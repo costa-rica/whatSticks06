@@ -11,7 +11,9 @@ def create_app():
     login_manager.init_app(app)
 
     from app_package.users.routes import users
+    from app_package.dashboard.routes import dash
     
     app.register_blueprint(users)
+    app.register_blueprint(dash)
     
     return app      

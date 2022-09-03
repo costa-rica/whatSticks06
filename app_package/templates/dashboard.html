@@ -1,0 +1,32 @@
+{% extends "_layout.html" %}
+{% block main %}
+<section class="dashboard">
+
+  <div class = "dashboard_body">
+    <div class = "title">
+      {{ page_name }}
+    </div>
+
+    <div class="dashboard_form">
+      <form method="POST" action="">
+        Current User: {{ current_user.email }}
+
+        <div class="chart">
+            The chart should go here
+        </div>
+
+        
+
+        
+      </form>
+
+    </div>
+    
+  </div>
+
+</section>
+
+
+
+
+{% endblock %}

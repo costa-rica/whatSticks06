@@ -1,10 +1,29 @@
-<h1>What Sticks Reboot</h1>
-<h3>Home page</h3>
+{% extends "_layout.html" %}
+{% block main %}
 
-<div class="flex-container">
+<section class = "home">
+
+  <div class = "home_body">
+    <div class = "title">
+      Home page
+    </div>
+    
     <form method="POST" action="">
-        <input type="submit" value="Register" name="register">
-        <input type="submit" value="Login" name="login">
+      <div class="home_buttons">
 
-      </form>
-</div>
+        <a class = "div_button home_register" href="{{ url_for('users.register') }}">
+          Register
+        </a> 
+
+        <a class = "div_button home_login" href="{{ url_for('users.login') }}">
+          Login
+        </a>
+
+      </div>
+    </form>
+    
+  </div>
+
+</section>
+
+{% endblock %}

@@ -42,7 +42,7 @@ def login():
                 # next = request.args.get('next')
                 # if not is_safe_url(next):
                 #     return flask.abort(400)
-                return redirect(url_for('users.login'))
+                return redirect(url_for('dash.dashboard'))
             else:
                 print("does not match")
 
