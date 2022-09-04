@@ -2,7 +2,7 @@ from flask import Blueprint
 from flask import render_template, url_for, redirect, flash, request, abort, session,\
     Response, current_app, send_from_directory
 import bcrypt
-from wsh_models import sess, Users, login_manager
+from wsh_models import sess, Users, login_manager, Oura_token, Locations
 from flask_login import login_required, login_user, logout_user, current_user
 
 
@@ -34,8 +34,9 @@ def login():
         user = sess.query(Users).filter_by(email=email).first()
         print('user for logging in:::', user)
         # verify password using hash
-        if formDict.get('password'):
-            if bcrypt.checkpw(formDict.get('password').encode(), user.password):
+        password = formDict.get('password_text')
+        if password:
+            if bcrypt.checkpw(password.encode(), user.password):
                 print("match")
                 login_user(user)
                 flash('Logged in succesfully')
@@ -45,19 +46,12 @@ def login():
                 return redirect(url_for('dash.dashboard'))
             else:
                 print("does not match")
+        else:
+            print('No password ****')
 
         # if successsful login_something_or_other...
 
-        if formDict.get('page'):
-            return redirect(url_for('users.page'))
-        elif formDict.get('protected_page'):
-            return redirect(url_for('users.protected_page'))
-        elif formDict.get('logout'):
-            return redirect(url_for('users.logout'))
 
-        if current_user:
-            print('current_user:::')
-            print(dir(current_user))
     
     return render_template('login.html', page_name = page_name)
 
@@ -66,7 +60,7 @@ def register():
     page_name = 'Register'
     if request.method == 'POST':
         formDict = request.form.to_dict()
-        hash_pw = bcrypt.hashpw(formDict.get('password').encode(), salt)
+        hash_pw = bcrypt.hashpw(formDict.get('password_text').encode(), salt)
         new_user = Users(email = formDict.get('email'), password = hash_pw)
         sess.add(new_user)
         sess.commit()
@@ -75,26 +69,52 @@ def register():
     return render_template('login.html', page_name = page_name)
 
 
-@users.route('/protected_page', methods = ['GET', 'POST'])
-@login_required
-def protected_page():
-    page_name = 'Protected Page'
-    something = current_user
-    if request.method == 'POST':
-        formDict = request.form.to_dict()
-        email = formDict.get('email')
-
-        if formDict.get('page'):
-            return redirect(url_for('users.page'))
-        elif formDict.get('protected_page_1'):
-            return redirect(url_for('users.protected_page'))
-        elif formDict.get('logout'):
-            return redirect(url_for('users.logout'))
-    
-    return render_template('protected_page.html', page_name = page_name,
-        current_user = current_user)
 
 @users.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('users.login'))
+
+
+@users.route('/account', methods = ['GET', 'POST'])
+@login_required
+def account():
+    page_name = 'Account Page'
+    email = current_user.email
+
+    if current_user.oura_token_id:
+        oura_token = current_user.oura_token_id[0].token
+    else:
+        oura_token = ''
+
+    if request.method == 'POST':
+        formDict = request.form.to_dict()
+        print('formDict:::', formDict)
+
+        if formDict.get('oura_token'):
+            #check if token exists for user
+            if current_user.oura_token_id:
+                print('* TOKEN found *')
+                print('current_user.oura_token_id:', current_user.oura_token_id)
+                current_user.oura_token_id[0].token = formDict.get('oura_token')
+                sess.commit()
+
+            #if token doesn't exist
+            else:
+                print('* No TOKEN found *')
+                new_oura_token = Oura_token(
+                                    id = current_user.id,
+                                    token = formDict.get('oura_token'),
+                                    )
+                sess.add(new_oura_token)
+                sess.commit()
+            return redirect(url_for('users.account'))
+        
+        if formDict.get('location_text'):
+
+            current_user.lat = formDict.get('location_text').split(',')[0]
+            current_user.lon = formDict.get('location_text').split(',')[1]
+            sess.commit()
+    
+    return render_template('account.html', page_name = page_name, email=email,
+         oura_token = oura_token)

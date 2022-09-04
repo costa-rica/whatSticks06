@@ -29,65 +29,67 @@
         <div class="middle_nav_div">
             <h1>What Sticks</h1>
             {% if current_user.is_authenticated %}
-            <h3>{{ current_user.username }}</h3>
+            <h3>{{ current_user.email }}</h3>
             {% endif %}
         </div>
 
-            <nav>
-                <img id="mobile-exit" class="mobile-menu-exit" src="../static/images/exit.svg" alt="Close Navigation">
-                <ul class="primary-nav ul_primary" id="nav_horizontal_list">
-                    {% if current_user.is_authenticated %}
-                                       
-                    <li class="nav-item dropdown li_primary">
-                        <a href="#" class="nav-link dropdown-toggle" id="navbarDropdown1"role="button"
-                            data-bs-toggle="dropdown"aria-expanded="false">Your Data</a>
+        <nav>
+            <img id="mobile-exit" class="mobile-menu-exit" src="../static/images/exit.svg" alt="Close Navigation">
+            <ul class="primary-nav ul_primary" id="nav_horizontal_list">
+                {% if current_user.is_authenticated %}
+                                    
+                <!-- <li class="nav-item dropdown li_primary">
+                    <a href="#" class="nav-link dropdown-toggle" id="navbarDropdown1"role="button"
+                        data-bs-toggle="dropdown"aria-expanded="false">Your Data</a>
 
-                            <div class="dropdown-menu wsh_items_alignment" aria-labelledby="navbarDropdown1">
-                                <a class="dropdown-item" href="#">Dashboard</a>
-                                <a class="dropdown-item" href="#">Link/Add Device</a>
+                    <div class="dropdown-menu wsh_items_alignment" aria-labelledby="navbarDropdown1">
+                        <a class="dropdown-item" href="#">Dashboard</a>
+                        <a class="dropdown-item" href="#">Link/Add Device</a>
 
-                                <button type="button" class="button_link" data-bs-toggle="modal" 
-                                    data-bs-target="#activityModal">Add Activity
-                                </button>
-                                <button type="button" class="button_link" data-bs-toggle="modal" 
-                                data-bs-target="#weightModal">Add Weight
-                                </button>
-                                <a class="dropdown-item grey_background" href="#">Analysis</a>
-                            </div>
-                    </li>
-                    
-                    <!-- <li class="nav-item li_primary"><a class="nav-link" href="{{ url_for('main.about') }}">About</a></li> -->
+                        <button type="button" class="button_link" data-bs-toggle="modal" 
+                            data-bs-target="#activityModal">Add Activity
+                        </button>
+                        <button type="button" class="button_link" data-bs-toggle="modal" 
+                        data-bs-target="#weightModal">Add Weight
+                        </button>
+                        <a class="dropdown-item grey_background" href="#">Analysis</a>
+                    </div>
+                </li> -->
+                
+                
 
-                    <li class="nav-item dropdown li_primary">
-                        <a href="#" class="nav-link dropdown-toggle" id="navbarDropdown2"role="button"
-                            data-bs-toggle="dropdown"aria-expanded="false">About</a>
+                <!-- <li class="nav-item dropdown li_primary">
+                    <a href="#" class="nav-link dropdown-toggle" id="navbarDropdown2"role="button"
+                        data-bs-toggle="dropdown"aria-expanded="false">About</a>
 
-                            <div class="dropdown-menu wsh_items_alignment" aria-labelledby="navbarDropdown2">
-                                <a class="dropdown-item" href="#">About</a>
-                                <a class="dropdown-item" href="#">Privacy</a>
-                                <a class="dropdown-item" href="#">Contact Us</a>
-                            </div>
-                    </li>
+                    <div class="dropdown-menu wsh_items_alignment" aria-labelledby="navbarDropdown2">
+                        <a class="dropdown-item" href="#">About</a>
+                        <a class="dropdown-item" href="#">Privacy</a>
+                        <a class="dropdown-item" href="#">Contact Us</a>
+                    </div>
+                </li> -->
+                <li class="nav-item li_primary"><a class="nav-link" href="{{ url_for('dash.dashboard') }}">Dashboard</a></li>
+                <li class="nav-item li_primary"><a class="nav-link" href="{{ url_for('users.account') }}">Account</a></li>
+                <li class="nav-item li_primary"><a class="nav-link" href="#">Logout</a></li>
+                {% else %}
 
-                    <li class="nav-item li_primary"><a class="nav-link" href="#">Logout</a></li>
-                    {% else %}
+                <!-- <li class="nav-item dropdown li_primary">
+                    <a href="#" class="nav-link dropdown-toggle" id="navbarDropdown2"role="button"
+                        data-bs-toggle="dropdown"aria-expanded="false">About</a>
 
-                    <li class="nav-item dropdown li_primary">
-                        <a href="#" class="nav-link dropdown-toggle" id="navbarDropdown2"role="button"
-                            data-bs-toggle="dropdown"aria-expanded="false">About</a>
+                        <div class="dropdown-menu wsh_items_alignment" aria-labelledby="navbarDropdown2">
+                            <a class="dropdown-item" href="#">About</a>
+                            <a class="dropdown-item" href="#">Privacy</a>
+                            <a class="dropdown-item" href="#">Contact Us</a>
+                        </div>
+                </li> -->
 
-                            <div class="dropdown-menu wsh_items_alignment" aria-labelledby="navbarDropdown2">
-                                <a class="dropdown-item" href="#">About</a>
-                                <a class="dropdown-item" href="#">Privacy</a>
-                                <a class="dropdown-item" href="#">Contact Us</a>
-                            </div>
-                    </li>
-
-                    <li class="nav-item li_primary"><a class="nav-link" href="{{ url_for('users.login') }}">Login</a></li>
-                    <li class="nav-item li_primary"><a class="nav-link" href="{{ url_for('users.home') }}">Home</a></li>
-                    {% endif %}
-                </ul>
-            </nav>
+                <li class="nav-item li_primary"><a class="nav-link" href="{{ url_for('users.login') }}">Login</a></li>
+                <li class="nav-item li_primary"><a class="nav-link" href="{{ url_for('users.home') }}">Home</a></li>
+                
+                {% endif %}
+            </ul>
+        </nav>
 
     </section>
 

@@ -14,6 +14,7 @@ dash = Blueprint('dash', __name__)
 def dashboard():
     print('Current User: ', current_user)
     print(dir(current_user))
+    page_name = 'Dashboard'
     if request.method == 'POST':
         formDict = request.form.to_dict()
         # if formDict.get('login'):
@@ -21,4 +22,4 @@ def dashboard():
         # elif formDict.get('register'):
         #     return redirect(url_for('users.register'))
         print('formDict::', formDict)
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', page_name=page_name)

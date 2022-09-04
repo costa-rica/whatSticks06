@@ -1,0 +1,95 @@
+{% extends "_layout.html" %}
+{% block main %}
+
+<section class="account">
+
+    <div class="account_body">
+        <div class="title">
+            Account page
+        </div>
+
+        <div class="register_form">
+            <form method="POST" action="">
+
+                <label for="email">Email:</label>
+                <input type="text" id="email" name="email" class="register_text" value="{{ email }} "><br><br>
+                <!-- <label for="password">Password:</label>
+                <input type="password" id="password_text" name="password_text" class="register_text" value="{{ passwd }}">
+                <div class="element_right">
+
+                <input class="form-check-input password_checkbox" type="checkbox" value="" id="password_checkbox">
+                <label class="form-check-label password_checkbox" for="password_checkbox">
+                    Show password
+                </label>
+
+                </div><br> -->
+
+
+                <label for="oura_token">Oura Ring Token:</label>
+                <input type="text" id="oura_token" name="oura_token" class="register_text"
+                    value="{{ oura_token }}"><br><br>
+
+                <label for="location_text">Location:</label>
+                <input type="text" id="location_text" name="location_text" class="register_text"
+                    placeholder="Latitude, Longitude">
+
+                <div class="element_right">
+
+                    <input class="btn btn-secondary btn_loc" type="button" value=""
+                        onclick="getLocation()">
+                    <label class="form-check-label password_checkbox">
+                        Get Location
+                    </label>
+    
+                </div><br><br>
+
+                <div class="element_right">
+
+                    <input type="submit" value="Update" class="btn btn-secondary btn_custom01">
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- Show password
+<script>
+    window.addEventListener("load", function () {
+        var checkbox = document.getElementById('password_checkbox');
+        var x = document.getElementById('password_text');
+        checkbox.addEventListener('change', function () {
+            if (this.checked) {
+                x.type = 'text';
+            } else {
+                x.type = 'password';
+            }
+        });
+    });
+</script> -->
+
+<!-- Get location -->
+<script>
+    var x = document.getElementById("location_text");
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            x.innerHTML = "Geolocation is not supported by this browser.";
+        }
+    }
+
+    function showPosition(position) {
+        x.value = position.coords.latitude + ", " + position.coords.longitude;
+    }
+</script>
+<!-- location source: https://www.w3schools.com/html/tryit.asp?filename=tryhtml5_geolocation -->
+
+
+
+{% endblock %}

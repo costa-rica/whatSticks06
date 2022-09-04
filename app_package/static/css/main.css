@@ -10585,6 +10585,10 @@ textarea.form-control-lg {
   color: #5c507c;
 }
 
+:root {
+  --nav_height: 166px;
+}
+
 body {
   background-color: var(--bs-gray-200);
 }
@@ -10681,7 +10685,7 @@ section.navbar_section .navbar_custom nav .dropdown:hover {
 
 /* Home */
 section.home .home_body {
-  padding: 123.4px 0 60px 0;
+  padding: var(--nav_height) 0 60px 0;
 }
 section.home .home_body .title {
   padding: 50px 0 0 25px;
@@ -10713,7 +10717,7 @@ section.home .home_body .home_buttons .home_login {
 
 /* Register */
 section.register .register_body {
-  padding: 123.4px 5px 0 10px;
+  padding: var(--nav_height) 5px 0 10px;
 }
 section.register .register_body .title {
   font-size: 3em;
@@ -10742,9 +10746,47 @@ section.register .register_body .register_form .element_right .btn_custom01 {
   font-size: 1.5em;
 }
 
+/* Account */
+section.account .account_body {
+  padding: var(--nav_height) 5px 0 10px;
+}
+section.account .account_body .title {
+  font-size: 3em;
+}
+section.account .account_body .register_form {
+  border-radius: 3em;
+  padding: 50px 0 50px 5px;
+  margin: 0 0 0 30px;
+  font-size: 1.5em;
+  background-color: var(--bs-primary);
+  border: 1px solid var(--bs-primary);
+  border-width: 0.5em;
+  color: white;
+}
+section.account .account_body .register_form label {
+  min-width: 110px;
+}
+section.account .account_body .register_form .register_text {
+  min-width: 85%;
+}
+section.account .account_body .register_form .element_right {
+  padding: 0 20% 10% 0;
+}
+section.account .account_body .register_form .element_right .btn_custom01 {
+  float: right;
+  font-size: 1.5em;
+}
+section.account .account_body .register_form .element_right .password_checkbox {
+  float: right;
+}
+section.account .account_body .register_form .element_right .btn_loc {
+  border-radius: 3em;
+  float: right;
+}
+
 /* Dashboard */
 section.dashboard .dashboard_body {
-  padding: 123.4px 5px 0 10px;
+  padding: var(--nav_height) 5px 0 10px;
 }
 section.dashboard .dashboard_body .title {
   font-size: 3em;
