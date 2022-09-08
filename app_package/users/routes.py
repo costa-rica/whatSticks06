@@ -1,10 +1,13 @@
 from flask import Blueprint
-from flask import render_template, url_for, redirect, flash, request, abort, session,\
-    Response, current_app, send_from_directory
+from flask import render_template, url_for, redirect, flash, request, \
+    abort, session, Response, current_app, send_from_directory
 import bcrypt
-from wsh_models import sess, Users, login_manager, Oura_token, Locations
+from wsh_models import sess, Users, login_manager, Oura_token, Locations, \
+    Weather_history
 from flask_login import login_required, login_user, logout_user, current_user
-
+import requests
+from app_package.users.utils import oura_sleep_call, oura_sleep_db_add
+from sqlalchemy import func
 
 salt = bcrypt.gensalt()
 
@@ -82,39 +85,62 @@ def account():
     page_name = 'Account Page'
     email = current_user.email
 
-    if current_user.oura_token_id:
-        oura_token = current_user.oura_token_id[0].token
+    existing_oura_token =sess.query(Oura_token, func.max(
+        Oura_token.id)).filter_by(user_id=current_user.id).first()[0]
+    
+    
+
+
+    if existing_oura_token:
+        oura_token = current_user.oura_token_id[-1].token
+        existing_oura_token_str = str(existing_oura_token.token)
+
     else:
         oura_token = ''
+        existing_oura_token_str = ''
 
     if request.method == 'POST':
         formDict = request.form.to_dict()
-        print('formDict:::', formDict)
+ 
+        if formDict.get('oura_token') != existing_oura_token_str:
 
-        if formDict.get('oura_token'):
-            #check if token exists for user
-            if current_user.oura_token_id:
-                print('* TOKEN found *')
-                print('current_user.oura_token_id:', current_user.oura_token_id)
-                current_user.oura_token_id[0].token = formDict.get('oura_token')
+            new_token=formDict.get('oura_token')
+            if new_token != '':
+                #if new token is NOT blank
+                #--1)update token
+                add_new_token = Oura_token(token=formDict.get('oura_token'), user_id=current_user.id)
+                sess.add(add_new_token)
                 sess.commit()
 
-            #if token doesn't exist
-            else:
-                print('* No TOKEN found *')
-                new_oura_token = Oura_token(
-                                    id = current_user.id,
-                                    token = formDict.get('oura_token'),
-                                    )
-                sess.add(new_oura_token)
+                #--2)make oura api          
+                sleep_dict = oura_sleep_call(new_token = new_token)
+
+                #--3)store date in database
+                
+                oura_sleep_db_add(sleep_dict, add_new_token.id)
+
+                #-- 4) get oldest oura sleep date
+
+                #-- 5) check if location exists
+
+                #-- 6) if location exists make api call for all dates wh
+
+                return redirect(url_for('users.account'))
+            
+            else: # token is blank commit blank token
+                new_token = Oura_token(token=formDict.get('oura_token'), user_id=current_user.id)
+                sess.add(new_token)
                 sess.commit()
-            return redirect(url_for('users.account'))
+
+                return redirect(url_for('users.account'))
         
         if formDict.get('location_text'):
 
             current_user.lat = formDict.get('location_text').split(',')[0]
             current_user.lon = formDict.get('location_text').split(',')[1]
             sess.commit()
+
+            
     
     return render_template('account.html', page_name = page_name, email=email,
          oura_token = oura_token)

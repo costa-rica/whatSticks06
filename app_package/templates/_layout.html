@@ -70,7 +70,7 @@
                 </li> -->
                 <li class="nav-item li_primary"><a class="nav-link" href="{{ url_for('dash.dashboard') }}">Dashboard</a></li>
                 <li class="nav-item li_primary"><a class="nav-link" href="{{ url_for('users.account') }}">Account</a></li>
-                <li class="nav-item li_primary"><a class="nav-link" href="#">Logout</a></li>
+                <li class="nav-item li_primary"><a class="nav-link" href="{{ url_for('users.logout') }}">Logout</a></li>
                 {% else %}
 
                 <!-- <li class="nav-item dropdown li_primary">
