@@ -94,11 +94,12 @@
     </section>
 
     <div class = "flash_custom_parent">
+        <br><br><br><br><br>
       {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
     
-          <div class="alert alert-{{ category }} flash_custom" >
+          <div class="alert alert-{{ category }} "  >
 
     
             {{ message }}
