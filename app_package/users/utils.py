@@ -6,7 +6,7 @@ import requests
 from datetime import datetime
 from wsh_models import sess, Users, Locations, Weather_history, \
     Oura_token, Oura_sleep_descriptions, User_location_day
-
+import time
 
 def oura_sleep_call(new_token):
     # print('*********')
@@ -17,7 +17,8 @@ def oura_sleep_call(new_token):
     # print('status_code: ', response_sleep.status_code)
     sleep_dict = response_sleep.json()
     # print('len of response: ', len(sleep_dict))
-    if response_sleep.status_code !='200':
+    print('response_code: ',response_sleep.status_code)
+    if response_sleep.status_code !=200:
         print('*** Error With Token ****')
         return 'Error with Token'
     else:
@@ -25,21 +26,22 @@ def oura_sleep_call(new_token):
 
 def oura_sleep_db_add(sleep_dict, oura_token_id):
     # Add oura dictionary response to database
+    startTime_db_oura_add = time.time()
+    deleted_elements = 0 
     
     for sleep_session in sleep_dict['sleep']:
         sleep_session_exists = sess.query(Oura_sleep_descriptions).filter_by(
             bedtime_end = sleep_session.get('bedtime_end'),
             user_id = current_user.id).first()
         if not sleep_session_exists:
-            # print('Keys in first sleep session: ', sleep_session.keys())
-            # print('There are ', len(sleep_session.keys()), ' keys in this list')
 
             # delete any dict element whose key is not in column list
             for element in list(sleep_session.keys()):
                 if element not in Oura_sleep_descriptions.__table__.columns.keys():
-                    print('element to delete: ', element)
+                    # print('element to delete: ', element)
                     
                     del sleep_session[element]
+                    deleted_elements += 1
 
 
             sleep_session['user_id'] = current_user.id
@@ -53,6 +55,35 @@ def oura_sleep_db_add(sleep_dict, oura_token_id):
                 new_sleep = Oura_sleep_descriptions(**sleep_session)
                 sess.add(new_sleep)
                 sess.commit()
+    
+    executionTime = (time.time() - startTime_db_oura_add)
+    print('Add Oura Data Execution time in seconds: ' + str(executionTime))
+    print(f'Number of eleements deleted {deleted_elements}')
+
+
+def location_exists(user):
+    
+    min_loc_distance_difference = 1000
+
+    locations_unique_list = sess.query(Locations).all()
+    for loc in locations_unique_list:
+        lat_diff = abs(user.lat - loc.lat)
+        lon_diff = abs(user.lon - loc.lon)
+        loc_dist_diff = lat_diff + lon_diff
+        print('** Differences **')
+        print('lat_difference:', lat_diff)
+        print('lon_diff:', lon_diff)
+
+        if loc_dist_diff < min_loc_distance_difference:
+            print('-----> loc_dist_diff is less than min required')
+            min_loc_distance_difference = loc_dist_diff
+            location_id = loc.id
+
+    if min_loc_distance_difference > .1:
+        location_id = 0
+    
+    # returns location_id = 0 if there is no location less than sum of .1 degrees
+    return location_id
 
 def weather_api_call():
     print('***** weather_api_call Funct *****')
