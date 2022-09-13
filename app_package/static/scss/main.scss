@@ -147,7 +147,7 @@ section.register{
             // display:flex;
             // padding-top: 5%;
             border-radius: 3em;
-            padding: 50px 0 50px 5px;
+            padding: 50px 0 150px 5px;
             margin: 0 0 0 30px;
             // text-align: center;
             font-size: 1.5em;
@@ -163,7 +163,7 @@ section.register{
             }
             .element_right{
                 
-                padding:0 20% 10% 0;
+                padding:0 20% 0 0;
                 .btn_custom01 {
                     float: right;
                     font-size: 1.5em;
@@ -172,6 +172,13 @@ section.register{
                 // margin-left: auto; 
                 // margin-right: 0;
                 // background-color: red;
+            }
+            .forgot_password {
+                float: right;
+                padding-right: 10%;
+                vertical-align: top;
+                // background-color: #20c997;
+                a{color: white;}
             }
         }
     }
@@ -247,6 +254,12 @@ section.dashboard{
             border: 1px solid var(--bs-primary);
             border-width: .5em;
             color: white;
+            .chart {
+                width: 90%;
+                border-radius: 2em;
+                padding: 10%;
+                background-color: #20c997;
+            }
         }
     }
 }

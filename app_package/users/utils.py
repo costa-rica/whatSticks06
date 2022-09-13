@@ -1,22 +1,43 @@
-from flask import current_app
-from flask_login import login_required, login_user, logout_user, \
-    current_user
+from flask import current_app, url_for
+from flask_login import current_user
 import json
 import requests
 from datetime import datetime
 from wsh_models import sess, Users, Locations, Weather_history, \
     Oura_token, Oura_sleep_descriptions, User_location_day
 import time
+from flask_mail import Message
+from app_package import mail
+from wsh_config import ConfigDev
+config = ConfigDev()
+
+def send_reset_email(user):
+    token = user.get_reset_token()
+    msg = Message('Password Reset Request',
+                  sender=config.MAIL_USERNAME,
+                  recipients=[user.email])
+    msg.body = f'''To reset your password, visit the following link:
+{url_for('users.reset_token', token=token, _external=True)}
+
+If you did not make this request, ignore email and there will be no change
+'''
+
+    mail.send(msg)
+
+
+def send_confirm_email(email):
+    msg = Message('Registration Confirmation',
+        sender=current_app.config['MAIL_USERNAME'],
+        recipients=[email])
+    msg.body = 'You have succesfully been registered to What-Sticks.'
+    mail.send(msg)
+
 
 def oura_sleep_call(new_token):
-    # print('*********')
-    # print('** Made Oura Ring Call ***')
-    # print('******')
+
     url_sleep='https://api.ouraring.com/v1/sleep?start=2020-03-11&end=2020-03-21?'
     response_sleep = requests.get(url_sleep, headers={"Authorization": "Bearer " + new_token})
-    # print('status_code: ', response_sleep.status_code)
     sleep_dict = response_sleep.json()
-    # print('len of response: ', len(sleep_dict))
     print('response_code: ',response_sleep.status_code)
     if response_sleep.status_code !=200:
         print('*** Error With Token ****')
@@ -42,7 +63,6 @@ def oura_sleep_db_add(sleep_dict, oura_token_id):
                     
                     del sleep_session[element]
                     deleted_elements += 1
-
 
             sleep_session['user_id'] = current_user.id
             sleep_session['token_id'] = oura_token_id
@@ -111,10 +131,7 @@ def weather_api_call():
     r_history = requests.get(base_url + history, params = payload)
     print('r_history status code: ', r_history.status_code)
     weather_dict = r_history.json()
-    # print(payload)
-    print('******')
-    print('weather_api dict')
-    print(weather_dict)
+
     #4) return dictionary
     return weather_dict
 
@@ -162,14 +179,11 @@ def add_db_weather_hist(weather_dict, location_id):
 
 def db_add_user_loc_day(avgtemp_f, location_id):
     print('***in db_add_user_loc_day ***')
-    # print(weather_dict)
     #1) dict with stuff
     add_dict = {}
     #2) add these itmes
         #user_id
     add_dict['user_id'] = current_user.id
-        
-
         #date
     add_dict['date'] = datetime.today().strftime('%Y-%m-%d')
         #local_time

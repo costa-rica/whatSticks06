@@ -2,9 +2,12 @@ from flask import Blueprint
 from flask import render_template, url_for, redirect, flash, request, abort, session,\
     Response, current_app, send_from_directory
 # import bcrypt
-from wsh_models import sess, Users, login_manager
+from wsh_models import sess, Users, login_manager, User_location_day
 from flask_login import login_required, login_user, logout_user, current_user
-
+from datetime import datetime
+import numpy
+import pandas as pd
+from app_package.dashboard.utilsChart import make_chart 
 
 
 
@@ -15,11 +18,40 @@ def dashboard():
     print('Current User: ', current_user)
     print(dir(current_user))
     page_name = 'Dashboard'
+
+    base_query = sess.query(User_location_day).filter_by(user_id = 1)
+
+    df = pd.read_sql(str(base_query)[:-1] + str(1), sess.bind)
+
+    table_name = 'user_location_day_'
+    cols = list(df.columns)
+    for col in cols: df = df.rename(columns=({col: col[len(table_name):]}))
+    
+    #get rid of rows with missing temperature
+    df = df[df['avgtemp_f'].notna()]
+
+    #Make list date
+    # temp_data_list = [round(int(temp)) if temp!=None else 1000 for temp in df['avgtemp_f'].to_list() ]
+    temp_data_list = [round(int(temp)) for temp in df['avgtemp_f'].to_list() ]
+
+    sleep_data_list = df['score'].to_list()
+
+    dates_list =[datetime.strptime(i,'%m/%d/%Y') for i in df['date'].to_list() ]
+
+    script_b, div_b, cdn_js_b = make_chart(dates_list, temp_data_list, sleep_data_list)
+
+    #calculate correlation:
+    print('sleep score correlation: ')
+    print(df['avgtemp_f'].corr(df['score']))
+    print('*****************')
+    correlation = df['avgtemp_f'].corr(df['score'])
+
+
     if request.method == 'POST':
         formDict = request.form.to_dict()
-        # if formDict.get('login'):
-        #     return redirect(url_for('users.login'))
-        # elif formDict.get('register'):
-        #     return redirect(url_for('users.register'))
+
         print('formDict::', formDict)
-    return render_template('dashboard.html', page_name=page_name)
+
+    return render_template('dashboard.html', page_name=page_name,
+        script_b = script_b, div_b = div_b, cdn_js_b = cdn_js_b, 
+        correlation = round(correlation, 2))

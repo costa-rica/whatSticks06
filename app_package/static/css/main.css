@@ -10724,7 +10724,7 @@ section.register .register_body .title {
 }
 section.register .register_body .register_form {
   border-radius: 3em;
-  padding: 50px 0 50px 5px;
+  padding: 50px 0 150px 5px;
   margin: 0 0 0 30px;
   font-size: 1.5em;
   background-color: var(--bs-primary);
@@ -10739,11 +10739,19 @@ section.register .register_body .register_form .register_text {
   min-width: 85%;
 }
 section.register .register_body .register_form .element_right {
-  padding: 0 20% 10% 0;
+  padding: 0 20% 0 0;
 }
 section.register .register_body .register_form .element_right .btn_custom01 {
   float: right;
   font-size: 1.5em;
+}
+section.register .register_body .register_form .forgot_password {
+  float: right;
+  padding-right: 10%;
+  vertical-align: top;
+}
+section.register .register_body .register_form .forgot_password a {
+  color: white;
 }
 
 /* Account */
@@ -10800,6 +10808,12 @@ section.dashboard .dashboard_body .dashboard_form {
   border: 1px solid var(--bs-primary);
   border-width: 0.5em;
   color: white;
+}
+section.dashboard .dashboard_body .dashboard_form .chart {
+  width: 90%;
+  border-radius: 2em;
+  padding: 10%;
+  background-color: #20c997;
 }
 
 @media only screen and (min-width: 1080px) {

@@ -9,10 +9,12 @@
 
     <div class="dashboard_form">
       <form method="POST" action="">
-        Current User: {{ current_user.email }}
 
+        <div class="correlation_div">
+          When the temperature raises increased your sleep score drops by a score of {{ correlation }} .
+        </div>
         <div class="chart">
-            The chart should go here
+          {{ div_b|safe }}
         </div>
 
         
@@ -26,6 +28,15 @@
 
 </section>
 
+
+{{ script_b|safe }}
+
+
+
+<script src="{{ cdn_js_b[0] }}" crossorigin="anonymous"></script>
+<script type="text/javascript">
+    Bokeh.set_log_level("info");
+</script>
 
 
 
