@@ -108,7 +108,8 @@ def location_exists(user):
 def weather_api_call():
     print('***** weather_api_call Funct *****')
     #1) get weatehr api token form config
-    api_token = [j  for i,j in current_app.config.items() if i=='WEATHER_API_KEY'][0]
+    # api_token = [j  for i,j in current_app.config.items() if i=='WEATHER_API_KEY'][0]
+    api_token = config.WEATHER_API_KEY# <-- not sure why i had line above. this is better.
 
     #2) get location from current user
     location_coords = f'{current_user.lat},{current_user.lon}'
