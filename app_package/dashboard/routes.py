@@ -43,7 +43,7 @@ def dashboard():
 
     sleep_data_list = df['score'].to_list()
 
-    dates_list =[datetime.strptime(i,'%m/%d/%Y') for i in df['date'].to_list() ]
+    dates_list =[datetime.strptime(i,'%Y-%m-%d') for i in df['date'].to_list() ]
 
     script_b, div_b, cdn_js_b = make_chart(dates_list, temp_data_list, sleep_data_list)
 

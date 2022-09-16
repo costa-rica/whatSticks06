@@ -3,15 +3,27 @@ from flask import render_template, url_for, redirect, flash, request, \
     abort, session, Response, current_app, send_from_directory
 import bcrypt
 from wsh_models import sess, Users, login_manager, Oura_token, Locations, \
-    Weather_history, User_location_day
+    Weather_history, User_location_day, Oura_sleep_descriptions
 from flask_login import login_required, login_user, logout_user, current_user
 import requests
-from app_package.users.utils import oura_sleep_call, oura_sleep_db_add, \
-    add_db_locations, weather_api_call, add_db_weather_hist, db_add_user_loc_day, \
-    location_exists, send_reset_email, send_confirm_email
-    
+
+
+#Oura
+from app_package.users.utils import oura_sleep_call, oura_sleep_db_add
+
+#weather- old
+# from app_package.users.utils import add_db_locations, weather_api_call, \
+#     add_db_weather_hist, db_add_user_loc_day, \
+#     location_exists
+from app_package.users.utils import call_weather_api, location_exists, \
+    add_weather_history
+from app_package.users.utils import send_reset_email, send_confirm_email
+
+
+
+
 from sqlalchemy import func
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 # from wsh_config import ConfigDev
 
@@ -92,7 +104,6 @@ def register():
     return render_template('register.html', page_name = page_name)
 
 
-
 @users.route('/logout')
 def logout():
     logout_user()
@@ -142,61 +153,212 @@ def account():
             new_location = formDict.get('location_text')
             email = formDict.get('email')
             user = sess.query(Users).filter_by(id = current_user.id).first()
+            yesterday = datetime.today() - timedelta(days=1)
+            yesterday_formatted =  yesterday.strftime('%Y-%m-%d')
+            user_loc_days = sess.query(User_location_day).filter_by(user_id=current_user.id).all()
+            user_loc_days_date_dict = {i.date : i.id for i in user_loc_days}
 
             #1) User adds Oura_token data
                 #a cases oura_token was blank and not it is not
                 #b case oura_token was not blank and not it is different than before
             if new_token != existing_oura_token_str:#<-- if new token is different 
+                print('------ Does this work when there was not token to start with ????? ------')
+                #1-1a) if user has token replace it
+                if existing_oura_token:
+                    existing_oura_token.token = new_token
+                    sess.commit()
 
-                #1-1) add token to Oura_token
-                print('* --> start oura_ring token data process')
-                add_new_token = Oura_token(token = new_token, user_id=current_user.id)
-                sess.add(add_new_token)
-                sess.commit()
+                    oura_token_id = existing_oura_token.id
 
-                if new_token != '':#<-- if new token is not blank make api call
-                    #1-2) call oura_ring api with new token
-                    sleep_dict = oura_sleep_call(new_token = new_token)
-                    if sleep_dict == 'Error with Token':
-                        flash('Error with token api call - verify token was typed in correctly', 'warning')
-                        return redirect(url_for('users.account'))
+                #1-1b) else add new token
+                else:
+                    new_oura_token = Oura_token(user_id = current_user.id,
+                        token = new_token)
+                    sess.add(new_oura_token)
+                    sess.commit()
 
-                    #1-3) add oura data to Oura_sleep_descriptions
-                    oura_sleep_db_add(sleep_dict, add_new_token.id)
-                    #TODO: this step works but is really slow
+                    oura_token_id = new_oura_token.id
+
+                #1-1b-1) check if user has oura data yesterday
+                oura_yesterday = sess.query(Oura_sleep_descriptions).filter_by(
+                    user_id = current_user.id,
+                    summary_date = yesterday_formatted).first()
+                
+                # --> 1-1b-1a) if yes, nothing 
+
+
+                # --> 1-1b-1b) if no, call API
+                if not oura_yesterday:
+                    url_sleep=current_app.config['OURA_API_URL_BASE']#TODO: put this address in config
+                    response_sleep = requests.get(url_sleep, headers={"Authorization": "Bearer " + new_token})
+                    if response_sleep.status_code ==200:
+                        sleep_dict = response_sleep.json()
+
+                # --> 1-1b-2)Response data add to OUra_sleep_desciprtions for each session in response
+                        user_sleep_sessions = sess.query(Oura_sleep_descriptions).filter_by(user_id = current_user.id).all()
+                        user_sleep_end_list = [i.bedtime_end for i in user_sleep_sessions]
+                # -------> 1-1b-2a) if endsleep exists, skip
+                
+                # -------> 1-1b-2b) if  endsleep NOT exists, add row
+                        for session in sleep_dict.get('sleep'):
+                            if session.get('bedtime_end') not in user_sleep_end_list:
+
+                                for element in list(session.keys()):
+                                    if element not in Oura_sleep_descriptions.__table__.columns.keys():
+                                        del session[element]
+
+                                #CHECKED check this reference of new_oura_token works????? 
+                                #CHECKED 9/16/2022 and it seems to be working fine here
+                                session['token_id'] = oura_token_id
+                                session['user_id'] = current_user.id
+
+                                new_oura_session_date = session['summary_date']
+                                new_oura_session_score = session['score']
+                                
+                                try:
+                                    new_oura_session = Oura_sleep_descriptions(**session)
+                                    sess.add(new_oura_session)
+                                    sess.commit()
+                                    oura_add_successfully = True
+                                except:
+                                    print(f"Failed to add oura data row for sleepend: {session.get('bedtime_end')}")
+                                    oura_add_successfully = False
+
+                #1-1b-3) Update/add to User_loc_day: For each user row in sleep_descript
+
+                # DO not get sleep location for past days
+                
+                                if oura_add_successfully:# ---> if date already exists, update score
+                                    if new_oura_session.summary_date in user_loc_days_date_dict.keys():
+                                        user_loc_day_update = sess.query(User_location_day).get(user_loc_days_date_dict[new_oura_session.summary_date])
+                                        
+#TODO: Problem wiht Location_id for User_loc_day ------------*
+                                        #Problem adding when htere is no location associated with User_loc_day becuase location_id is nullable=False. Maybe we don't need that to be the case?
+                                        user_loc_day_update.score = new_oura_session_score
+                                        sess.commit()
+
+                                    else:# ---> if NO date exits add row
+                                        new_user_loc_day = User_location_day(
+                                            user_id = current_user.id,
+                                            date = new_oura_session_date,
+                                            score = new_oura_session_score,
+                                            row_type = 'backfill')
+                                        try:
+                                            sess.add(new_user_loc_day)
+                                            sess.commit()
+                                            print(f"Successfully added User_location_day row for user: {current_user.id}, date: {new_oura_session_date}")
+                                        except:
+                                            print(f"failed to add User_location_day row for user: {current_user.id}, date: {new_oura_session_date}")
+
+
+                
+
+
+
+
+
+
+
+                # #1-1) add token to Oura_token
+                # print('* --> start oura_ring token data process')
+                # add_new_token = Oura_token(token = new_token, user_id=current_user.id)
+                # sess.add(add_new_token)
+                # sess.commit()
+
+                # if new_token != '':#<-- if new token is not blank make api call
+                #     #1-2) call oura_ring api with new token
+                #     sleep_dict = oura_sleep_call(new_token = new_token)
+                #     if sleep_dict == 'Error with Token':
+                #         flash('Error with token api call - verify token was typed in correctly', 'warning')
+                #         return redirect(url_for('users.account'))
+
+                #     #1-3) add oura data to Oura_sleep_descriptions
+                #     oura_sleep_db_add(sleep_dict, add_new_token.id)
+                #     #TODO: this step works but is really slow
             
 
             #2) User adds location data
                 #a case location was blank and now it is not anymore
                 #b case location is different than it was before
             if new_location != existing_coordinates:
-                print('* --> start location data process')
 
-                #2-1) update users location in Users
-                # user = sess.query(Users).filter_by(id = current_user.id).first()
-                
                 if new_location == '':
                     user.lat = None
                     user.lon = None
                     sess.commit()
                 
                 else:#<-- location has latitude and longitude
+                #Add to users table
                     user.lat = formDict.get('location_text').split(',')[0]
                     user.lon = formDict.get('location_text').split(',')[1]
                     sess.commit()
 
-                    #2-2) check locations
+                #2-1) check if new user location exists (or close) in Locations table
                     location_id = location_exists(user)
+                    if location_id > 0:
+                        print('--- location already exists ----')
+                #2-1a) if exists get yesterdays' weather history and make a user_loc_day row for user
+                        yest_weather_hist = sess.query(Weather_history).filter_by(
+                            location_id = location_id
+                        ).first()
+                        # yesterday = datetime.today() - timedelta(days=1)
+                        # yesterday_formatted =  yesterday.strftime('%Y-%m-%d')
+                        new_user_loc_day = User_location_day(user_id=current_user.id,
+                            location_id = location_id,
+                            date = yesterday_formatted,
+                            avgtemp_f = yest_weather_hist.avgtemp_f,
+                            row_type='backfill')
+                        sess.add(new_user_loc_day)
+                        sess.commit()
 
-                    if location_id == 0:#<-- add new location
-                        
-                    
-                    #2-2) call weather api to get location data
-                        weather_dict = weather_api_call()
+                    else:# Location is completely new
+                        print('*** Are we in new location ????')
+                #2-1b-1) call weather api
+                        weather_api_response = call_weather_api(user)
 
-                    #2-3) add location dat to Locations table
-                        #-- make sure location is new .. use >.1 deg script
-                        location_id = add_db_locations(weather_dict)
+                        if isinstance(weather_api_response,dict):
+                #Add location
+                            new_location = Locations(
+                                city = weather_api_response.get('location').get('name'),
+                                region = weather_api_response.get('location').get('region'),
+                                country = weather_api_response.get('location').get('country'),
+                                lat = weather_api_response.get('location').get('lat'),
+                                lon = weather_api_response.get('location').get('lon')
+                                )
+                            sess.add(new_location)
+                            sess.commit()
+
+                            location_id = new_location.id
+                            print('***** ****')
+                            print(f'***** New location id: {location_id} ****')
+                            print('***** ****')
+
+                #2-1b-2) use response to populate yesterday's history in WEather_history
+                            add_weather_history(weather_api_response, location_id)
+
+                #2-1b-3) Add row for user in User_location_day
+                            yesterday = datetime.today() - timedelta(days=1)
+                            yesterday_formatted =  yesterday.strftime('%Y-%m-%d')
+
+                            yesterday_weather_hist = sess.query(Weather_history).filter_by(
+                                location_id = location_id, date = yesterday_formatted
+                            ).first()
+
+                            try:
+                                new_user_loc_day = User_location_day(
+                                    user_id = user.id,
+                                    location_id = location_id,
+                                    date = yesterday_formatted,
+                                    avgtemp_f = yesterday_weather_hist.avgtemp_f,
+                                    row_type = 'backfill'
+                                )
+                                sess.add(new_user_loc_day)
+                                sess.commit()
+                            except:
+                                print('User_loc_day failed to append')
+
+
+
 
             #3) User changes email
             if email != user.email:

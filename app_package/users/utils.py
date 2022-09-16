@@ -2,13 +2,14 @@ from flask import current_app, url_for
 from flask_login import current_user
 import json
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 from wsh_models import sess, Users, Locations, Weather_history, \
     Oura_token, Oura_sleep_descriptions, User_location_day
 import time
 from flask_mail import Message
 from app_package import mail
 from wsh_config import ConfigDev
+
 config = ConfigDev()
 
 def send_reset_email(user):
@@ -31,6 +32,78 @@ def send_confirm_email(email):
         recipients=[email])
     msg.body = 'You have succesfully been registered to What-Sticks.'
     mail.send(msg)
+
+
+
+def call_weather_api(user):
+#2-1b-1) call weather API
+    api_token = current_app.config['WEATHER_API_KEY']
+    # base_url = 'http://api.weatherapi.com/v1'#TODO: put this address in config
+    base_url = current_app.config['WEATHER_API_URL_BASE']
+    history = '/history.json'#TODO: put this address in config
+    payload = {}
+    payload['q'] = f"{user.lat}, {user.lon}"
+    payload['key'] = api_token
+    yesterday = datetime.today() - timedelta(days=1)
+    payload['dt'] = yesterday.strftime('%Y-%m-%d')
+    payload['hour'] = 0
+
+#2-1b) if new location is new add location to Locations
+    print('* --> start location data process')
+    new_location = Locations()
+    try:
+        r_history = requests.get(base_url + history, params = payload)
+        
+        if r_history.status_code == 200:
+        
+            #2) for each id call weather api
+            return r_history.json()
+        else:
+            return f'Problem connecting with Weather API. Response code: {r_history.status_code}'
+    except:
+        return 'Error making call to Weather API. No response.'
+
+
+def add_weather_history(weather_api_response, location_id):
+    forecast = weather_api_response.get('forecast').get('forecastday')[0]
+    
+    row_exists = sess.query(Weather_history).filter_by(
+        location_id= location_id,
+        date = forecast.get('date')).first()
+
+    if not row_exists:
+        weather_hist_temp = {}
+        # Get location stuff
+        weather_hist_temp['city_location_name'] = weather_api_response.get('location').get('name')
+        weather_hist_temp['region_name'] = weather_api_response.get('location').get('region')
+        weather_hist_temp['country_name'] = weather_api_response.get('location').get('country')
+        weather_hist_temp['lat'] = weather_api_response.get('location').get('lat')
+        weather_hist_temp['lon'] = weather_api_response.get('location').get('lon')
+        weather_hist_temp['tz_id'] = weather_api_response.get('location').get('tz_id')
+        weather_hist_temp['location_id'] = location_id 
+        
+        #Get temperature stuff
+        weather_hist_temp['date']= forecast.get('date')
+        weather_hist_temp['maxtemp_f']= forecast.get('day').get('maxtemp_f')
+        weather_hist_temp['mintemp_f']= forecast.get('day').get('mintemp_f')
+        weather_hist_temp['avgtemp_f']= forecast.get('day').get('avgtemp_f')
+        weather_hist_temp['sunset']= forecast.get('astro').get('sunset')
+        weather_hist_temp['sunrise']= forecast.get('astro').get('sunrise')
+        # weather_hist_list.append(weather_hist_temp)
+        try:
+            new = Weather_history(**weather_hist_temp)
+            sess.add(new)
+            sess.commit()
+            # counter_all += 1
+
+            return "successfully added to weather histrory"
+        except:
+            return "failed to add weather history"
+
+
+
+
+
 
 
 def oura_sleep_call(new_token):
@@ -104,102 +177,4 @@ def location_exists(user):
     
     # returns location_id = 0 if there is no location less than sum of .1 degrees
     return location_id
-
-def weather_api_call():
-    print('***** weather_api_call Funct *****')
-    #1) get weatehr api token form config
-    # api_token = [j  for i,j in current_app.config.items() if i=='WEATHER_API_KEY'][0]
-    api_token = config.WEATHER_API_KEY# <-- not sure why i had line above. this is better.
-
-    #2) get location from current user
-    location_coords = f'{current_user.lat},{current_user.lon}'
-
-
-    #3) make weather call 
-    base_url = 'http://api.weatherapi.com/v1'
-    # current = '/current.json'
-    # astronomy = '/astronomy.json'
-    history = '/history.json'
-
-    payload = {}
-    payload['q'] = location_coords
-    payload['key'] = api_token
-
-    payload['dt'] = datetime.today().strftime('%Y-%m-%d')
-    # payload['end_dt'] = '2022-09-09'
-    payload['hour'] = 0
-
-    r_history = requests.get(base_url + history, params = payload)
-    print('r_history status code: ', r_history.status_code)
-    weather_dict = r_history.json()
-
-    #4) return dictionary
-    return weather_dict
-
-def add_db_locations(weather_dict):
-    add_dict = {}
-    add_dict['city'] = weather_dict.get('location').get('name')
-    add_dict['region'] = weather_dict.get('location').get('region')
-    add_dict['country'] = weather_dict.get('location').get('country')
-    add_dict['lat'] = weather_dict.get('location').get('lat')
-    add_dict['lon'] = weather_dict.get('location').get('lon')
-    new = Locations(**add_dict)
-    sess.add(new)
-    sess.commit()
-    return new.id
-
-def add_db_weather_hist(weather_dict, location_id):
-    hist_forecast_list = weather_dict.get('forecast').get('forecastday')
-    
-    weather_hist_list=[]
-    for forecast in hist_forecast_list:
-        weather_hist_temp ={}
-        # Get location stuff
-
-        weather_hist_temp['city_location_name'] = weather_dict.get('location').get('name')
-        weather_hist_temp['region_name'] = weather_dict.get('location').get('region')
-        weather_hist_temp['country_name'] = weather_dict.get('location').get('country')
-        weather_hist_temp['lat'] = weather_dict.get('location').get('lat')
-        weather_hist_temp['lon'] = weather_dict.get('location').get('lon')
-        weather_hist_temp['tz_id'] = weather_dict.get('location').get('tz_id')
-        weather_hist_temp['location_id'] = location_id #needs location id*****
-        
-        #Get temperature stuff
-        weather_hist_temp['date']= forecast.get('date')
-        weather_hist_temp['maxtemp_f']= forecast.get('day').get('maxtemp_f')
-        weather_hist_temp['mintemp_f']= forecast.get('day').get('mintemp_f')
-        weather_hist_temp['avgtemp_f']= forecast.get('day').get('avgtemp_f')
-        weather_hist_temp['sunset']= forecast.get('astro').get('sunset')
-        weather_hist_temp['sunrise']= forecast.get('astro').get('sunrise')
-        weather_hist_list.append(weather_hist_temp)
-        new = Weather_history(**weather_hist_list[0])
-        sess.add(new)
-        sess.commit()
-
-        return new.id
-
-def db_add_user_loc_day(avgtemp_f, location_id):
-    print('***in db_add_user_loc_day ***')
-    #1) dict with stuff
-    add_dict = {}
-    #2) add these itmes
-        #user_id
-    add_dict['user_id'] = current_user.id
-        #date
-    add_dict['date'] = datetime.today().strftime('%Y-%m-%d')
-        #local_time
-    add_dict['local_time'] = datetime.now().strftime("%H:%M:%S")
-        #avgtemp_f
-    # add_dict['avgtemp_f'] = weather_dict.get('forecast').get('forecastday').get('day').get('avgtemp_f')
-    add_dict['avgtemp_f'] = avgtemp_f
-        #row_tpe = 'user'
-    add_dict['row_type'] = 'user'
-        #locagtion_id
-    add_dict['location_id'] = location_id
-
-    new = User_location_day(**add_dict)
-    sess.add(new)
-    sess.commit()
-
-    return new.id
 

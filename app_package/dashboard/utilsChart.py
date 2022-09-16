@@ -10,10 +10,17 @@ from flask import current_app
 
 
 def make_chart(dates_list, temp_data_list, sleep_data_list):
-    # Temperature circles
-    fig1=figure(toolbar_location=None,tools='xwheel_zoom,xpan',active_scroll='xwheel_zoom',
-            x_range=(dates_list[-7],dates_list[-1]),
-            y_range=(-10,110),sizing_mode='stretch_width', height=400)
+    
+    if len(dates_list) > 8:
+        # Temperature circles
+        fig1=figure(toolbar_location=None,tools='xwheel_zoom,xpan',active_scroll='xwheel_zoom',
+                x_range=(dates_list[-7],dates_list[-1]),
+                y_range=(-10,110),sizing_mode='stretch_width', height=400)
+    else:# --> user has less than 7 days of observed data
+        # Temperature circles
+        fig1=figure(toolbar_location=None,tools='xwheel_zoom,xpan',active_scroll='xwheel_zoom',
+                x_range=(dates_list[0],dates_list[-1]),
+                y_range=(-10,110),sizing_mode='stretch_width', height=400)
 
     fig1.circle(dates_list,temp_data_list, 
         legend_label="Temperature (F)", 
