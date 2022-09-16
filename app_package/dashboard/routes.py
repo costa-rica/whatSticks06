@@ -21,7 +21,14 @@ def dashboard():
 
     base_query = sess.query(User_location_day).filter_by(user_id = 1)
 
-    df = pd.read_sql(str(base_query)[:-1] + str(1), sess.bind)
+    current_user_id = current_user.id if current_user.id != 2 else 1
+    df = pd.read_sql(str(base_query)[:-1] + str(current_user_id), sess.bind)
+    print('df is what::: ', df)
+    if df.empty:
+        print('**** Yes that is what is its! ****')
+        return render_template('dashboard_empty.html', page_name=page_name)
+    else:
+        print(' Data frame is not empyt')
 
     table_name = 'user_location_day_'
     cols = list(df.columns)
@@ -41,9 +48,6 @@ def dashboard():
     script_b, div_b, cdn_js_b = make_chart(dates_list, temp_data_list, sleep_data_list)
 
     #calculate correlation:
-    print('sleep score correlation: ')
-    print(df['avgtemp_f'].corr(df['score']))
-    print('*****************')
     correlation = df['avgtemp_f'].corr(df['score'])
 
 

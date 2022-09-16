@@ -10586,7 +10586,7 @@ textarea.form-control-lg {
 }
 
 :root {
-  --nav_height: 166px;
+  --nav_height: 125px;
 }
 
 body {
@@ -10598,7 +10598,16 @@ body {
   min-width: 75px;
 }
 
+.btn_custom02 {
+  border-radius: 3em;
+  min-width: 75px;
+  background-color: var(--bs-secondary);
+}
+
 /* Navbar */
+section.navbar_section {
+  display: none;
+}
 section.navbar_section .navbar_custom {
   justify-content: flex-start;
   position: fixed;
@@ -10683,6 +10692,20 @@ section.navbar_section .navbar_custom nav .dropdown:hover {
   background-color: none;
 }
 
+/* Flash */
+.flash_custom_parent {
+  background-color: brown;
+  position: relative;
+}
+.flash_custom_parent .alert_custom {
+  position: absolute;
+  top: var(--nav_height);
+  width: 100%;
+}
+.flash_custom_parent .alert_custom .close_right {
+  float: right;
+}
+
 /* Home */
 section.home .home_body {
   padding: var(--nav_height) 0 60px 0;
@@ -10724,7 +10747,7 @@ section.register .register_body .title {
 }
 section.register .register_body .register_form {
   border-radius: 3em;
-  padding: 50px 0 150px 5px;
+  padding: 50px 0 200px 5px;
   margin: 0 0 0 30px;
   font-size: 1.5em;
   background-color: var(--bs-primary);
@@ -10741,7 +10764,11 @@ section.register .register_body .register_form .register_text {
 section.register .register_body .register_form .element_right {
   padding: 0 20% 0 0;
 }
-section.register .register_body .register_form .element_right .btn_custom01 {
+section.register .register_body .register_form .element_right .element_right_sub {
+  width: 30%;
+  float: right;
+}
+section.register .register_body .register_form .element_right .element_right_sub input {
   float: right;
   font-size: 1.5em;
 }
@@ -10816,8 +10843,17 @@ section.dashboard .dashboard_body .dashboard_form .chart {
   background-color: #20c997;
 }
 
+@media only screen and (min-width: 800px) {
+  /* Navbar */
+  section.navbar_section {
+    display: block;
+  }
+}
 @media only screen and (min-width: 1080px) {
   /* Navbar */
+  section.navbar_section {
+    display: block;
+  }
   section.navbar_section .navbar_custom .middle_nav_div {
     display: initial;
     padding-left: 30%;

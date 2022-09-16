@@ -13,6 +13,9 @@ from app_package.users.utils import oura_sleep_call, oura_sleep_db_add, \
 from sqlalchemy import func
 from datetime import datetime
 import time
+# from wsh_config import ConfigDev
+
+# config = ConfigDev()
 
 salt = bcrypt.gensalt()
 
@@ -36,27 +39,34 @@ def login():
     page_name = 'Login'
     if request.method == 'POST':
         formDict = request.form.to_dict()
+        print('**** formDict ****')
+        print(formDict)
         email = formDict.get('email')
-        print('email from webstie:::', email)
 
         user = sess.query(Users).filter_by(email=email).first()
         print('user for logging in:::', user)
         # verify password using hash
         password = formDict.get('password_text')
+
         if user:
             if password:
                 if bcrypt.checkpw(password.encode(), user.password):
                     print("match")
                     login_user(user)
                     flash('Logged in succesfully', 'info')
-                    # next = request.args.get('next')
-                    # if not is_safe_url(next):
-                    #     return flask.abort(400)
+
                     return redirect(url_for('dash.dashboard'))
                 else:
                     print("does not match")
             else:
                 print('No password ****')
+        elif formDict.get('btn_login_as_guest'):
+            print('GUEST EMAIL::: ', current_app.config['GUEST_EMAIL'])
+            user = sess.query(Users).filter_by(id=2).first()
+            login_user(user)
+            flash('Logged in succesfully as Guest', 'info')
+
+            return redirect(url_for('dash.dashboard'))
         else:
             flash('No user by that name', 'warning')
 
@@ -79,7 +89,7 @@ def register():
         sess.commit()
         return redirect(url_for('users.login'))
 
-    return render_template('login.html', page_name = page_name)
+    return render_template('register.html', page_name = page_name)
 
 
 
@@ -122,93 +132,97 @@ def account():
 
 
     if request.method == 'POST':
-        startTime_post = time.time()
-        formDict = request.form.to_dict()
-        new_token = formDict.get('oura_token')
-        new_location = formDict.get('location_text')
-        email = formDict.get('email')
-        user = sess.query(Users).filter_by(id = current_user.id).first()
+        if current_user.id == 2:
+            flash('Guest can enter any values but they will not change the database', 'info')
+            return redirect(url_for('users.account'))
+        else:
+            startTime_post = time.time()
+            formDict = request.form.to_dict()
+            new_token = formDict.get('oura_token')
+            new_location = formDict.get('location_text')
+            email = formDict.get('email')
+            user = sess.query(Users).filter_by(id = current_user.id).first()
 
-        #1) User adds Oura_token data
-            #a cases oura_token was blank and not it is not
-            #b case oura_token was not blank and not it is different than before
-        if new_token != existing_oura_token_str:#<-- if new token is different 
+            #1) User adds Oura_token data
+                #a cases oura_token was blank and not it is not
+                #b case oura_token was not blank and not it is different than before
+            if new_token != existing_oura_token_str:#<-- if new token is different 
 
-            #1-1) add token to Oura_token
-            print('* --> start oura_ring token data process')
-            add_new_token = Oura_token(token = new_token, user_id=current_user.id)
-            sess.add(add_new_token)
-            sess.commit()
+                #1-1) add token to Oura_token
+                print('* --> start oura_ring token data process')
+                add_new_token = Oura_token(token = new_token, user_id=current_user.id)
+                sess.add(add_new_token)
+                sess.commit()
 
-            if new_token != '':#<-- if new token is not blank make api call
-                #1-2) call oura_ring api with new token
-                sleep_dict = oura_sleep_call(new_token = new_token)
-                if sleep_dict == 'Error with Token':
-                    flash('Error with token api call - verify token was typed in correctly', 'warning')
+                if new_token != '':#<-- if new token is not blank make api call
+                    #1-2) call oura_ring api with new token
+                    sleep_dict = oura_sleep_call(new_token = new_token)
+                    if sleep_dict == 'Error with Token':
+                        flash('Error with token api call - verify token was typed in correctly', 'warning')
+                        return redirect(url_for('users.account'))
+
+                    #1-3) add oura data to Oura_sleep_descriptions
+                    oura_sleep_db_add(sleep_dict, add_new_token.id)
+                    #TODO: this step works but is really slow
+            
+
+            #2) User adds location data
+                #a case location was blank and now it is not anymore
+                #b case location is different than it was before
+            if new_location != existing_coordinates:
+                print('* --> start location data process')
+
+                #2-1) update users location in Users
+                # user = sess.query(Users).filter_by(id = current_user.id).first()
+                
+                if new_location == '':
+                    user.lat = None
+                    user.lon = None
+                    sess.commit()
+                
+                else:#<-- location has latitude and longitude
+                    user.lat = formDict.get('location_text').split(',')[0]
+                    user.lon = formDict.get('location_text').split(',')[1]
+                    sess.commit()
+
+                    #2-2) check locations
+                    location_id = location_exists(user)
+
+                    if location_id == 0:#<-- add new location
+                        
+                    
+                    #2-2) call weather api to get location data
+                        weather_dict = weather_api_call()
+
+                    #2-3) add location dat to Locations table
+                        #-- make sure location is new .. use >.1 deg script
+                        location_id = add_db_locations(weather_dict)
+
+            #3) User changes email
+            if email != user.email:
+                
+                #check that not blank
+                if email == '':
+                    flash('Must enter a valid email.', 'warning')
                     return redirect(url_for('users.account'))
 
-                #1-3) add oura data to Oura_sleep_descriptions
-                oura_sleep_db_add(sleep_dict, add_new_token.id)
-                #TODO: this step works but is really slow
-        
+                #check that email doesn't alreay exist outside of current user
+                other_users_email_list = [i.email for i in sess.query(Users).filter(Users.id != current_user.id).all()]
 
-        #2) User adds location data
-            #a case location was blank and now it is not anymore
-            #b case location is different than it was before
-        if new_location != existing_coordinates:
-            print('* --> start location data process')
-
-            #2-1) update users location in Users
-            # user = sess.query(Users).filter_by(id = current_user.id).first()
-            
-            if new_location == '':
-                user.lat = None
-                user.lon = None
-                sess.commit()
-            
-            else:#<-- location has latitude and longitude
-                user.lat = formDict.get('location_text').split(',')[0]
-                user.lon = formDict.get('location_text').split(',')[1]
-                sess.commit()
-
-                #2-2) check locations
-                location_id = location_exists(user)
-
-                if location_id == 0:#<-- add new location
-                    
+                if email in other_users_email_list:
+                    flash('That email is being used by another user. Please choose another.', 'warning')
+                    return redirect(url_for('users.account'))
                 
-                #2-2) call weather api to get location data
-                    weather_dict = weather_api_call()
-
-                #2-3) add location dat to Locations table
-                    #-- make sure location is new .. use >.1 deg script
-                    location_id = add_db_locations(weather_dict)
-
-        #3) User changes email
-        if email != user.email:
-            
-            #check that not blank
-            if email == '':
-                flash('Must enter a valid email.', 'warning')
+                #update user email
+                user.email = email
+                sess.commit()
+                flash('Email successfully updated.', 'info')
                 return redirect(url_for('users.account'))
 
-            #check that email doesn't alreay exist outside of current user
-            other_users_email_list = [i.email for i in sess.query(Users).filter(Users.id != current_user.id).all()]
-
-            if email in other_users_email_list:
-                flash('That email is being used by another user. Please choose another.', 'warning')
-                return redirect(url_for('users.account'))
-            
-            #update user email
-            user.email = email
-            sess.commit()
-            flash('Email successfully updated.', 'info')
+            #END of POST
+            executionTime = (time.time() - startTime_post)
+            print('POST time in seconds: ' + str(executionTime))
             return redirect(url_for('users.account'))
-
-        #END of POST
-        executionTime = (time.time() - startTime_post)
-        print('POST time in seconds: ' + str(executionTime))
-        return redirect(url_for('users.account'))
             
     
     return render_template('account.html', page_name = page_name, email=email,

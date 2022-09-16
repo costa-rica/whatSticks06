@@ -10,6 +10,10 @@
     <!-- Import the Bootstrap stylesheet -->
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
 
+<!-- TESTing for flash message -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+
     <title>whatsticks</title>
 </head>
 <body>
@@ -92,38 +96,54 @@
         </nav>
 
     </section>
+    
+    <div class = "flash_custom_parent" >
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+      
+            <div class="alert alert-{{ category }} alert_custom" id="div_flash"  >
+              <i class="close icon"></i>
+      
+              {{ message }}
+              <div class="close_right">
+                <input type="button" value=&#10006 onclick="removeFlash()" class="btn btn-secondary btn_custom02">
+              </div>
+              
+            </div>
+          {% endfor %}
+        {% endif %}
+        {% endwith %}
+      
+      </div>
 
-    <div class = "flash_custom_parent">
-        <br><br><br><br><br>
-      {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-    
-          <div class="alert alert-{{ category }} "  >
-
-    
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
-      {% endwith %}
-    
-    </div>
     {% block main %}{% endblock %}
 
-    <script>
-        const mobileBtn = document.getElementById('mobile-cta')
-            nav = document.querySelector('nav')
-            mobileBtnExit = document.getElementById('mobile-exit');
+<script>
+    const mobileBtn = document.getElementById('mobile-cta')
+        nav = document.querySelector('nav')
+        mobileBtnExit = document.getElementById('mobile-exit');
 
-      mobileBtn.addEventListener('click', () => {
-          nav.classList.add('menu-btn');
-      })
+    mobileBtn.addEventListener('click', () => {
+        nav.classList.add('menu-btn');
+    })
 
-      mobileBtnExit.addEventListener('click', () => {
-          nav.classList.remove('menu-btn');
-      })
+    mobileBtnExit.addEventListener('click', () => {
+        nav.classList.remove('menu-btn');
+    })
 </script>
+
+<!-- Remove flash on click -->
+<script>
+    function removeFlash() {
+        const element = document.getElementById('div_flash');
+        element.remove();
+    }
+</script>
+
+
+
 
 </body>
 </html>
