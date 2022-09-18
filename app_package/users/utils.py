@@ -163,16 +163,16 @@ def location_exists(user):
         lat_diff = abs(user.lat - loc.lat)
         lon_diff = abs(user.lon - loc.lon)
         loc_dist_diff = lat_diff + lon_diff
-        print('** Differences **')
-        print('lat_difference:', lat_diff)
-        print('lon_diff:', lon_diff)
+        # print('** Differences **')
+        # print('lat_difference:', lat_diff)
+        # print('lon_diff:', lon_diff)
 
         if loc_dist_diff < min_loc_distance_difference:
-            print('-----> loc_dist_diff is less than min required')
             min_loc_distance_difference = loc_dist_diff
             location_id = loc.id
 
     if min_loc_distance_difference > .1:
+        print('-----> loc_dist_diff is less than min required')
         location_id = 0
     
     # returns location_id = 0 if there is no location less than sum of .1 degrees

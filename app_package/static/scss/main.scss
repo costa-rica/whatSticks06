@@ -19,7 +19,7 @@ body {
 
 /* Navbar */
 section.navbar_section {
-    display: none;
+
     .navbar_custom{
         justify-content: flex-start;
         position: fixed;
@@ -104,16 +104,11 @@ section.navbar_section {
 
 /* Flash */
 .flash_custom_parent {
-    // margin-top: 200;
-    background-color: brown;
     position: relative;
     .alert_custom{
         position: absolute;
         top: var(--nav_height);
-        // z-index: 9;
-        // background-color: burlywood;
-        // position: fixed;
-        // top: 200;
+
         width: 100%;
         .close_right{
             float: right;
@@ -269,7 +264,7 @@ section.dashboard{
             // padding: 50px 0 0 25px;
             font-size: 3em;
         }
-        .dashboard_form {
+        .dashboard_chart {
             // display:flex;
             // padding-top: 5%;
             border-radius: 3em;
@@ -287,18 +282,45 @@ section.dashboard{
                 padding: 10%;
                 background-color: #20c997;
             }
+            .correlation_div{text-align: center;}
         }
     }
 }
 
-//For Screen wider than 800 --- delete this
-@media only screen and (min-width: 800px) {
-    /* Navbar */
-    section.navbar_section {
-        display: block;
 
+/* About us */
+section.about_us {
+    padding: var(--nav_height) 5px 0 10px;
+    
+    .about_us_body{
+        
+        .title {
+            font-size: 3em;
+            // background-color: #20c997;
+        }
+        .div_writing{
+            // margin: 5%;
+            border-radius: 3em;
+            padding: 50px 0 50px 5px;
+            margin: 0 0 0 30px;
+            // text-align: center;
+            font-size: 1.5em;
+            background-color: var(--bs-primary);
+            border: 1px solid var(--bs-primary);
+            border-width: .5em;
+            color: white;
+            a {
+                color: white
+            }
+        }
     }
+
+
 }
+
+
+
+
 
 //For Screen wider than 1080
 @media only screen and (min-width: 1080px) {
@@ -314,4 +336,17 @@ section.navbar_section {
         }
     }
 }
+/* About us */
+section.about_us {
+    padding: var(--nav_height) 5px 0 10px;
+    
+    .about_us_body{
+        padding: 5%;
+        .div_writing{
+            .writing_content{ padding: 2.5%}
+
+        }
+    }
+}
+
 }

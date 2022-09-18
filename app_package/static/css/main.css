@@ -10605,9 +10605,6 @@ body {
 }
 
 /* Navbar */
-section.navbar_section {
-  display: none;
-}
 section.navbar_section .navbar_custom {
   justify-content: flex-start;
   position: fixed;
@@ -10694,7 +10691,6 @@ section.navbar_section .navbar_custom nav .dropdown:hover {
 
 /* Flash */
 .flash_custom_parent {
-  background-color: brown;
   position: relative;
 }
 .flash_custom_parent .alert_custom {
@@ -10826,7 +10822,7 @@ section.dashboard .dashboard_body {
 section.dashboard .dashboard_body .title {
   font-size: 3em;
 }
-section.dashboard .dashboard_body .dashboard_form {
+section.dashboard .dashboard_body .dashboard_chart {
   border-radius: 3em;
   padding: 50px 0 50px 5px;
   margin: 0 0 0 30px;
@@ -10836,19 +10832,37 @@ section.dashboard .dashboard_body .dashboard_form {
   border-width: 0.5em;
   color: white;
 }
-section.dashboard .dashboard_body .dashboard_form .chart {
+section.dashboard .dashboard_body .dashboard_chart .chart {
   width: 90%;
   border-radius: 2em;
   padding: 10%;
   background-color: #20c997;
 }
-
-@media only screen and (min-width: 800px) {
-  /* Navbar */
-  section.navbar_section {
-    display: block;
-  }
+section.dashboard .dashboard_body .dashboard_chart .correlation_div {
+  text-align: center;
 }
+
+/* About us */
+section.about_us {
+  padding: var(--nav_height) 5px 0 10px;
+}
+section.about_us .about_us_body .title {
+  font-size: 3em;
+}
+section.about_us .about_us_body .div_writing {
+  border-radius: 3em;
+  padding: 50px 0 50px 5px;
+  margin: 0 0 0 30px;
+  font-size: 1.5em;
+  background-color: var(--bs-primary);
+  border: 1px solid var(--bs-primary);
+  border-width: 0.5em;
+  color: white;
+}
+section.about_us .about_us_body .div_writing a {
+  color: white;
+}
+
 @media only screen and (min-width: 1080px) {
   /* Navbar */
   section.navbar_section {
@@ -10858,6 +10872,16 @@ section.dashboard .dashboard_body .dashboard_form .chart {
     display: initial;
     padding-left: 30%;
     color: white;
+  }
+  /* About us */
+  section.about_us {
+    padding: var(--nav_height) 5px 0 10px;
+  }
+  section.about_us .about_us_body {
+    padding: 5%;
+  }
+  section.about_us .about_us_body .div_writing .writing_content {
+    padding: 2.5%;
   }
 }
 

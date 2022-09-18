@@ -7,23 +7,24 @@
       {{ page_name }}
     </div>
 
-    <div class="dashboard_form">
-      <form method="POST" action="">
+    <div class="dashboard_chart">
 
-        <div class="correlation_div">
-          When the temperature raises increased your sleep score drops by a score of {{ correlation }} .
-        </div>
         <div class="chart">
           {{ div_b|safe }}
         </div>
-
-        
-
-        
-      </form>
-
     </div>
-    
+<br>
+    {% if correlation != 'too small sample' %}
+    <div class="dashboard_chart">
+      <div class="correlation_div">
+
+        When the temperature raises increased your sleep score changes by a score of {{ correlation }}
+      </div>
+
+  </div>
+  {% endif %}
+
+
   </div>
 
 </section>
