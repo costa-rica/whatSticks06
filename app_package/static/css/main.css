@@ -10888,6 +10888,18 @@ section.about_us .about_us_body .div_writing a {
   color: white;
 }
 
+/*Error Page*/
+section.Error {
+  padding: var(--nav_height) 5px 0 10px;
+  color: var(--bs-primary);
+}
+section.Error .error_body {
+  padding: 0 0 0 5px;
+}
+section.Error .error_body h3 {
+  padding: 25px 0 0 50px;
+}
+
 @media only screen and (min-width: 1080px) {
   /* Navbar */
   section.navbar_section {

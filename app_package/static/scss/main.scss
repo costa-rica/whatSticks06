@@ -350,6 +350,15 @@ section.about_us {
 
 }
 
+/*Error Page*/
+section.Error {
+    padding: var(--nav_height) 5px 0 10px;
+    color: var(--bs-primary);
+    .error_body{
+        padding: 0 0 0 5px;
+        h3{padding: 25px 0 0 50px;}
+    }
+}
 
 
 

@@ -22,8 +22,10 @@ def create_app():
 
     from app_package.users.routes import users
     from app_package.dashboard.routes import dash
+    from app_package.errors.routes import errors
     
     app.register_blueprint(users)
     app.register_blueprint(dash)
+    app.register_blueprint(errors)
     
     return app      
