@@ -1,9 +1,17 @@
 from flask import Flask
-from wsh_config import ConfigDev
+from wsh_config import ConfigDev, ConfigProd
 from wsh_models import login_manager
 from flask_mail import Mail
+import os
 
-config_object = ConfigDev()
+
+if os.environ.get('COMPUTERNAME')=='CAPTAIN2020' or os.environ.get('COMPUTERNAME')=='NICKSURFACEPRO4':
+    config_object = ConfigDev()
+    print('* Development')
+else:
+    config_object = ConfigProd()
+    print('* ---> Configured for Production')
+
 mail = Mail()
 def create_app():
     app = Flask(__name__)

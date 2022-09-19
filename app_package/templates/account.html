@@ -13,22 +13,16 @@
 
                 <label for="email">Email:</label>
                 <input type="text" id="email" name="email" class="register_text" value="{{ email }}"><br><br>
-                <!-- <label for="password">Password:</label>
-                <input type="password" id="password_text" name="password_text" class="register_text" value="{{ passwd }}">
-                <div class="element_right">
-
-                <input class="form-check-input password_checkbox" type="checkbox" value="" id="password_checkbox">
-                <label class="form-check-label password_checkbox" for="password_checkbox">
-                    Show password
-                </label>
-
-                </div><br> -->
 
 
-                <label for="oura_token">Oura Ring Token:</label>
-                
+                <!-- <label for="oura_token">Oura Ring Token:</label> -->
+                <button type="button" class="btn_to_label" data-bs-toggle="modal" 
+                    data-bs-target="#activityModal"><u>Oura Ring Token: </u>
+                </button>
                 <input type="text" id="oura_token" name="oura_token" class="register_text"
                     value="{{ oura_token }}"><br><br>
+
+
 
                 <label for="location_text">Location:</label>
                 <input type="text" id="location_text" name="location_text" class="register_text"
@@ -58,20 +52,34 @@
 
 </section>
 
-<!-- Show password
-<script>
-    window.addEventListener("load", function () {
-        var checkbox = document.getElementById('password_checkbox');
-        var x = document.getElementById('password_text');
-        checkbox.addEventListener('change', function () {
-            if (this.checked) {
-                x.type = 'text';
-            } else {
-                x.type = 'password';
-            }
-        });
-    });
-</script> -->
+
+
+<div class="modal fade" id="activityModal" tabindex="-1" aria-labelledby="activityModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Get your Oura Ring token</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"></span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <ol>
+                <li>Create an Oura account using the Oura iOS or Android application. Use the same account to sign-in to <a href="https://cloud.ouraring.com">https://cloud.ouraring.com</a>. </li>
+                <li>Next enter a reason and copy the token <a href="https://cloud.ouraring.com/personal-access-token ">https://cloud.ouraring.com/personal-access-token </a></li>
+            </ol>
+
+            
+        </div>
+        <!-- <div class="modal-footer">
+          <button type="button" class="btn btn-primary">Save changes</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div> -->
+      </div>
+    </div>
+  </div>
+  
+  
 
 <!-- Get location -->
 <script>

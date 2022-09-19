@@ -77,16 +77,17 @@
                 <li class="nav-item li_primary"><a class="nav-link" href="{{ url_for('users.logout') }}">Logout</a></li>
                 {% else %}
 
-                <!-- <li class="nav-item dropdown li_primary">
+
+                <li class="nav-item dropdown li_primary">
                     <a href="#" class="nav-link dropdown-toggle" id="navbarDropdown2"role="button"
                         data-bs-toggle="dropdown"aria-expanded="false">About</a>
 
-                        <div class="dropdown-menu wsh_items_alignment" aria-labelledby="navbarDropdown2">
-                            <a class="dropdown-item" href="#">About</a>
-                            <a class="dropdown-item" href="#">Privacy</a>
-                            <a class="dropdown-item" href="#">Contact Us</a>
-                        </div>
-                </li> -->
+                    <div class="dropdown-menu wsh_items_alignment" aria-labelledby="navbarDropdown2">
+                        <a class="dropdown-item" href="{{ url_for('users.about_us') }}">About</a>
+                        <a class="dropdown-item" href="{{ url_for('users.privacy') }}">Privacy</a>
+
+                    </div>
+                </li>
 
                 <li class="nav-item li_primary"><a class="nav-link" href="{{ url_for('users.login') }}">Login</a></li>
                 <li class="nav-item li_primary"><a class="nav-link" href="{{ url_for('users.home') }}">Home</a></li>

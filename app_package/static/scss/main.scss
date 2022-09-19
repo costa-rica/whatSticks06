@@ -151,6 +151,21 @@ section.home {
                 border-width: .5em;
             }
         }
+        .div_writing{
+            // margin: 5%;
+            border-radius: 3em;
+            padding: 50px 0 50px 5px;
+            margin: 0 0 0 30px;
+            // text-align: center;
+            font-size: 1.5em;
+            background-color: var(--bs-primary);
+            border: 1px solid var(--bs-primary);
+            border-width: .5em;
+            color: white;
+            a {
+                color: white
+            }
+        }
     }
 }
 
@@ -227,6 +242,18 @@ section.account{
             border: 1px solid var(--bs-primary);
             border-width: .5em;
             color: white;
+
+            .btn_to_label{
+                min-width: 110px;
+                margin-left:-10px;
+                // outline: none; 
+                border: none;
+                background:none;
+                color: white;
+            }
+
+
+
             label {
                 min-width: 110px;
             }
@@ -251,6 +278,11 @@ section.account{
 
         }
     }
+}
+
+/* Modal Account */
+.modal-body{
+    background-color: var(--bs-gray-500);
 }
 
 

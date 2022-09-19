@@ -10733,6 +10733,19 @@ section.home .home_body .home_buttons .home_login {
   border: 1px solid var(--bs-primary);
   border-width: 0.5em;
 }
+section.home .home_body .div_writing {
+  border-radius: 3em;
+  padding: 50px 0 50px 5px;
+  margin: 0 0 0 30px;
+  font-size: 1.5em;
+  background-color: var(--bs-primary);
+  border: 1px solid var(--bs-primary);
+  border-width: 0.5em;
+  color: white;
+}
+section.home .home_body .div_writing a {
+  color: white;
+}
 
 /* Register */
 section.register .register_body {
@@ -10794,6 +10807,13 @@ section.account .account_body .register_form {
   border-width: 0.5em;
   color: white;
 }
+section.account .account_body .register_form .btn_to_label {
+  min-width: 110px;
+  margin-left: -10px;
+  border: none;
+  background: none;
+  color: white;
+}
 section.account .account_body .register_form label {
   min-width: 110px;
 }
@@ -10813,6 +10833,11 @@ section.account .account_body .register_form .element_right .password_checkbox {
 section.account .account_body .register_form .element_right .btn_loc {
   border-radius: 3em;
   float: right;
+}
+
+/* Modal Account */
+.modal-body {
+  background-color: var(--bs-gray-500);
 }
 
 /* Dashboard */
