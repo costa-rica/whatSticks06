@@ -73,36 +73,14 @@ def df_for_nick():
 # def make_chart(dates_list, temp_data_list, sleep_data_list):
 def make_chart(lists_tuple):
     dates_list, sleep_data_list, temp_data_list = lists_tuple
-    print('dates_list')
-    print(dates_list)
 
-    # if len(dates_list) > 8:
-        
-    #     # Temperature circles
-    #     fig1=figure(toolbar_location=None,tools='xwheel_zoom,xpan',active_scroll='xwheel_zoom',
-    #             x_range=(dates_list[-7],dates_list[-1]),
-    #             y_range=(-10,110),sizing_mode='stretch_width', height=400)
-    # # elif len(dates_list) >1:# --> user has less than 7 days of observed data
-    # else:# --> user has less than 7 days of observed data
-    #     # Temperature circles
-    #     print('** STEP 1:  dates less than 8')
-    #     print('DATES used in chart:', dates_list[0],dates_list[-1])
     date_start = max(dates_list) - timedelta(days=8.5)
     date_end = max(dates_list) + timedelta(days=1)
     print('waht is hte last date:', dates_list[-1])
     fig1=figure(toolbar_location=None,tools='xwheel_zoom,xpan',active_scroll='xwheel_zoom',
-            
             x_range=(date_start,date_end),
             y_range=(-10,110),sizing_mode='stretch_width', height=400)
-    # else:# --> user has one date
-    #     # Temperature circles
-    #     print('** STEP 1:  dates less than 8')
-    #     print('DATES used in chart:', dates_list[0],dates_list[-1])
-    #     date_0 = datetime(2022, 9, 16, 0, 0)
-    #     fig1=figure(toolbar_location=None,tools='xwheel_zoom,xpan',active_scroll='xwheel_zoom',
-    #             # x_range=(dates_list[0],dates_list[-1]),
-    #             x_range=(date_0,dates_list[-1]),
-    #             y_range=(-10,110),sizing_mode='stretch_width', height=400)
+
 
     if temp_data_list != 'is empty':
         print('** STEP 2:  temp NOT empty ')

@@ -15,7 +15,7 @@ config = ConfigDev()
 def send_reset_email(user):
     token = user.get_reset_token()
     msg = Message('Password Reset Request',
-                  sender=config.MAIL_USERNAME,
+                  sender=config.EMAIL,
                   recipients=[user.email])
     msg.body = f'''To reset your password, visit the following link:
 {url_for('users.reset_token', token=token, _external=True)}
@@ -28,7 +28,7 @@ If you did not make this request, ignore email and there will be no change
 
 def send_confirm_email(email):
     msg = Message('Registration Confirmation',
-        sender=current_app.config['MAIL_USERNAME'],
+        sender=current_app.config['EMAIL'],
         recipients=[email])
     msg.body = 'You have succesfully been registered to What-Sticks.'
     mail.send(msg)
@@ -99,8 +99,6 @@ def add_weather_history(weather_api_response, location_id):
             return "successfully added to weather histrory"
         except:
             return "failed to add weather history"
-
-
 
 
 
