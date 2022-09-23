@@ -11,11 +11,13 @@ if os.environ.get('COMPUTERNAME')=='CAPTAIN2020' or os.environ.get('COMPUTERNAME
 else:
     config_object = ConfigProd()
     print('* ---> Configured for Production')
+    
 
 mail = Mail()
 def create_app():
     app = Flask(__name__)
     app.config.from_object(config_object)
+    print('app.config.get("ENV") says it is ---> ', app.config.get('ENV'))
 
     login_manager.init_app(app)
     mail.init_app(app)
