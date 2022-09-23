@@ -15,6 +15,7 @@ from app_package.dashboard.utilsChart import make_oura_df, make_user_loc_day_df,
 dash = Blueprint('dash', __name__)
 
 @dash.route('/dashboard', methods=['GET', 'POST'])
+@login_required
 def dashboard():
     print('current_User: ', current_user.email)
     page_name = 'Dashboard'

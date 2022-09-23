@@ -22,5 +22,10 @@ def error_400(error):
 
 @errors.app_errorhandler(500)
 def error_500(error):
-    error_message = f"Something wrong with webiste. Either try again or send email to {current_app.config['MAIL_USERNAME']}"
+    error_message = f"Something wrong with webiste. Either try again or send email to {current_app.config['EMAIL']}."
     return render_template('errors.html', error_number="500", error_message=error_message), 500
+
+@errors.app_errorhandler(AttributeError)
+def error_attribute(AttributeError):
+    error_message = f"If you're logged in already or think something else is wrong email {current_app.config['EMAIL']}."
+    return render_template('errors.html', error_number="Did you login?", error_message=error_message)
